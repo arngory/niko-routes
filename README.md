@@ -47,8 +47,9 @@ evidence: [<link or traffic capture showing the names and addresses>]
 - no suffix whose subdomains third parties control by DNS (shared hosting, cloud zones), and a search for dangling
   CNAMEs pointing at resources anyone could claim: a relay resolves `inside-only` names itself;
 - an entry that relies on a CDN names it (`cdn:`), from a closed list of providers kept by CI, with `evidence` and
-  review. CI builds those providers' ranges into files of their own (`cdn-<provider>`), listed in the signed
-  manifest, so a node cannot swap them. This does not lift the ban on CDN subnets in sets: a relay lets a
+  review. CI builds those providers' ranges into files of their own (`cdn-<provider>`, `kind: cdn`, no
+  `country`), listed in the signed manifest, so a node cannot swap them. Only the relay's check of its own
+  resolution reads them; sets, the node's nftables and client rules skip them, and the manifest schema enforces it. This does not lift the ban on CDN subnets in sets: a relay lets a
   resolved address out into a named CDN only when it resolved that entry's own name itself;
 - every Android package carries its signing certificates (`cert_sha256`). A confirmed client tags a connection with
   its set only when the installed package's signature matches, since a relay lets a confirmed inside-only app out
@@ -59,7 +60,7 @@ evidence: [<link or traffic capture showing the names and addresses>]
 CI builds one `.srs` per app and per `kind` and country, and `manifest.json` with a version that only grows and,
 per file, `name`, `sha256`, `size`, `kind`, `country` and `form`:
 
-- `kind`: `inside-only` | `blocked` | `ads` | `country`;
+- `kind`: `inside-only` | `blocked` | `ads` | `country` | `cdn`;
 - `form`: `srs` (read by the client) | `text` (read by the server).
 
 **Server form of the sets.** Next to each `.srs`, CI builds `<tag>.txt` from the same YAML entries:
