@@ -134,8 +134,9 @@ limits:
 
 ## Setting up the keys (owner)
 
-- lists key: `minisign -G` on an offline machine; the secret key goes into a GitHub environment that requires the
-  owner's approval for each run; the public key goes into `keys/lists.pub` here and into the Niko and raycontrol
-  builds;
+- lists key: `minisign -G` on an offline machine; the secret key goes into the release environment of GitHub,
+  with the owner as its only required reviewer, never into repository secrets: every workflow of the repository
+  can read those, the freshness job included, and the two keys would become one. The public key goes into
+  `keys/lists.pub` here and into the Niko and raycontrol builds;
 - freshness key: `minisign -G` the same way; the secret key goes into a separate environment open to `main` only;
   its public key is listed in `manifest.json`.
