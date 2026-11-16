@@ -45,10 +45,15 @@ evidence: [<link or traffic capture showing the names and addresses>]
 - no subnets of CDNs and shared clouds: an address there serves many sites, so those parts of a service are
   matched by name only;
 - no subnet wider than /16 for IPv4 or /32 for IPv6, no entry without `evidence`;
-- `cname` lists the CNAME targets an entry's names may point at; CI and the relay both check resolved names
-  against it;
-- names are matched on label boundaries, lower case, without a trailing dot, IDNs as A-labels (as sing-box
-  matches a `domain_suffix` without a leading dot);
+- `cname` lists the CNAME targets an entry's names may point at outside its own `domains`. When a relay resolves
+  an entry's name itself, every target in the CNAME chain must be under the entry's `domains` or match `cname`,
+  or it refuses; an empty `cname` allows no CNAME outside the entry's own domains. CI keeps `cname` narrow (exact
+  targets, not a provider's whole zone where anyone can claim a name) and rejects targets that resolve nowhere or
+  point at a resource anyone could claim;
+- names are matched on label boundaries, lower case, ASCII only (IDNs as A-labels), without a trailing dot. Sets
+  hold no other form. sing-box matches a `domain_suffix` without a leading dot on label boundaries and lowercases
+  the host, but does not strip a trailing dot, so the Niko client strips one from a sniffed or FakeIP name before
+  its rules;
 - a set's tag never ends in `.entries`, `.srs` or `.txt`;
 - no suffix whose subdomains third parties control by DNS (shared hosting, cloud zones), and a search for dangling
   CNAMEs pointing at resources anyone could claim: a relay resolves `inside-only` names itself;
@@ -66,7 +71,9 @@ evidence: [<link or traffic capture showing the names and addresses>]
 
 CI builds one `.srs` per app and per `kind` and country, and `manifest.json` with an `epoch`, a version that only
 grows within it (at most 2^53) and, per file, `name`, `sha256`, `size`, `kind`, `country` and `form`. The epoch must
-equal the one built into the reader; a release that retires a leaked lists key raises it.
+equal the one built into the reader; a release that retires a leaked lists key raises it, and the version starts
+again in the new epoch. A release is tagged `m<epoch>.<version>`; the tags are protected from deletion and
+rewriting, and a reader checking GitHub for the newest release looks only at its own epoch's tags.
 
 - `kind`: `inside-only` | `blocked` | `ads` | `country` | `cdn`;
 - `form`: `srs` (read by the client) | `text` (read by the server).
