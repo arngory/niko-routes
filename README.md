@@ -136,7 +136,11 @@ limits:
 
 - lists key: `minisign -G` on an offline machine; the secret key goes into the release environment of GitHub,
   with the owner as its only required reviewer, never into repository secrets: every workflow of the repository
-  can read those, the freshness job included, and the two keys would become one. The public key goes into
-  `keys/lists.pub` here and into the Niko and raycontrol builds;
+  can read those, the freshness job included, and the two keys would become one. The environment admits the
+  `main` branch only; the signing job itself requires `github.ref == 'refs/heads/main'` and
+  `github.event_name == 'workflow_dispatch'`, and its workflow has no `pull_request` or `pull_request_target`
+  trigger. The owner starts the run and approves it ("Prevent self-reviews" off while there is no other
+  reviewer). The key keeps its password, held as a second secret of the same environment. The public key goes
+  into `keys/lists.pub` here and into the Niko and raycontrol builds;
 - freshness key: `minisign -G` the same way; the secret key goes into a separate environment open to `main` only;
   its public key is listed in `manifest.json`.
