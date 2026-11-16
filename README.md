@@ -53,7 +53,9 @@ Two keys, as the content and timestamp roles in TUF:
   public keys are built into the Niko client and raycontrol only and change only with their releases;
 - the **freshness key** signs a small `timestamp.json` (the manifest's version and SHA-256, the signing time and
   `expires`, at most 14 days later) on a weekly schedule, committed to the unprotected `timestamp` branch. The
-  key lives in a GitHub environment open only to `main` and the schedule, not in repository secrets. Its public
+  key lives in a GitHub environment open only to the `main` branch, not in repository secrets; the job itself
+  requires `github.event_name == 'schedule'`, and the workflow has no `pull_request_target` or
+  `workflow_dispatch` trigger. Its public
   keys are listed in the signed manifest. A leak of it can only keep an old version alive, never change the lists.
 
 A reader checks the manifest first (the lists key, a version not below the one it accepted), then
