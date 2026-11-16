@@ -22,7 +22,9 @@ One file per app or service, `apps/<country>/<id>.yaml`:
 name: <display name>
 country: <ISO 3166-1 alpha-2, lower case>
 kind: inside-only        # inside-only | blocked | ads
-android: [<package name>]
+android:
+  - package: <package name>
+    cert_sha256: [<SHA-256 of a signing certificate>]   # APK v3 key rotation: list the lineage
 windows: [<program file name>]
 domains: [<domain suffix>]
 asn: [<AS number of the service owner itself>]
@@ -40,7 +42,10 @@ evidence: [<link or traffic capture showing the names and addresses>]
 - AS numbers expanded into subnets from RouteViews (CC BY 4.0, with attribution);
 - no subnets of CDNs and shared clouds: an address there serves many sites, so those parts of a service are
   matched by name only;
-- no subnet wider than /16 for IPv4, no entry without `evidence`.
+- no subnet wider than /16 for IPv4, no entry without `evidence`;
+- every Android package carries its signing certificates (`cert_sha256`). A confirmed client tags a connection with
+  its set only when the installed package's signature matches, since a relay lets a confirmed inside-only app out
+  to any address: an app with a borrowed package name must not get the tag.
 
 ## Build and signing
 
