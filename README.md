@@ -135,9 +135,9 @@ limits:
 ## Setting up the keys (owner)
 
 - lists key: `minisign -G` on an offline machine; the secret key goes into the environment `lists-release` as
-  `LISTS_MINISIGN_KEY`, its password as `LISTS_MINISIGN_PASSWORD`, with the owner as its only required reviewer, never into repository secrets: every workflow of the repository
-  can read those, the freshness job included, and the two keys would become one. The environment admits the
-  `main` branch only; the signing job itself requires `github.ref == 'refs/heads/main'` and
+  `LISTS_MINISIGN_KEY`, its password as `LISTS_MINISIGN_PASSWORD`, with the owner as its only required
+  reviewer, never into repository secrets: every workflow of the repository can read those, the freshness job
+  included, and the two keys would become one. The environment admits the `main` branch only; the signing job itself requires `github.ref == 'refs/heads/main'` and
   `github.event_name == 'workflow_dispatch'`, and its workflow has no `pull_request` or `pull_request_target`
   trigger. The owner starts the run and approves it ("Prevent self-reviews" off while there is no other
   reviewer). The public key goes into `keys/lists.pub` here and into the Niko and raycontrol builds;
