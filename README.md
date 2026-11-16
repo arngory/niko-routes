@@ -30,6 +30,7 @@ domains: [<domain suffix>]
 asn: [<AS number of the service owner itself>]
 cidr: [<subnet, when the owner has no AS of its own>]
 cdn: [<CDN provider the service relies on, by name>]
+cname: [<allowed CNAME targets of the entry's names>]
 evidence: [<link or traffic capture showing the names and addresses>]
 ```
 
@@ -43,7 +44,12 @@ evidence: [<link or traffic capture showing the names and addresses>]
 - AS numbers expanded into subnets from RouteViews (CC BY 4.0, with attribution);
 - no subnets of CDNs and shared clouds: an address there serves many sites, so those parts of a service are
   matched by name only;
-- no subnet wider than /16 for IPv4, no entry without `evidence`;
+- no subnet wider than /16 for IPv4 or /32 for IPv6, no entry without `evidence`;
+- `cname` lists the CNAME targets an entry's names may point at; CI and the relay both check resolved names
+  against it;
+- names are matched on label boundaries, lower case, without a trailing dot, IDNs as A-labels (as sing-box
+  matches a `domain_suffix` without a leading dot);
+- a set's tag never ends in `.entries`, `.srs` or `.txt`;
 - no suffix whose subdomains third parties control by DNS (shared hosting, cloud zones), and a search for dangling
   CNAMEs pointing at resources anyone could claim: a relay resolves `inside-only` names itself;
 - an entry that relies on a CDN names it (`cdn:`), from a closed list of providers kept by CI, with `evidence` and
@@ -57,7 +63,9 @@ evidence: [<link or traffic capture showing the names and addresses>]
 
 ## Build and signing
 
-CI builds one `.srs` per app and per `kind` and country, and `manifest.json` with a version that only grows and,
+CI builds one `.srs` per app and per `kind` and country, and `manifest.json` with an `epoch` and a version that only
+grows within it (at most 2^53; the epoch must equal the one built into the reader, and is raised by a release that
+retires a leaked lists key) and,
 per file, `name`, `sha256`, `size`, `kind`, `country` and `form`:
 
 - `kind`: `inside-only` | `blocked` | `ads` | `country` | `cdn`;
@@ -94,13 +102,15 @@ Two keys, as the content and timestamp roles in TUF:
 - the **lists key** signs `manifest.json` on a release, after reviewed PRs, with a human approving the job. Its
   public keys are built into the Niko client and raycontrol only and change only with their releases;
 - the **freshness key** signs a small `timestamp.json` (the manifest's version and SHA-256, the signing time and
-  `expires`, at most 14 days later) on a weekly schedule, committed to the unprotected `timestamp` branch. The
+  `expires`, at most 14 days later) every day, committed to the unprotected `timestamp` branch. The
   key lives in a GitHub environment open only to the `main` branch, not in repository secrets; the job itself
   requires `github.event_name == 'schedule'`, and the workflow has no `pull_request_target` or
   `workflow_dispatch` trigger. Its public
   keys are listed in the signed manifest. A leak of it can only keep an old version alive, never change the lists.
 
-A reader checks the manifest first (the lists key, a version not below the one it accepted), then
+The manifest may carry several signatures, one `.minisig` per key id; a reader accepts it if any trusted lists key
+verifies. A reader checks the manifest first (the lists key, its epoch, a version not below the one it accepted in
+that epoch), then
 `timestamp.json` under the freshness keys that manifest lists.
 
 ## Contributing
