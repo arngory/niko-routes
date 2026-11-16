@@ -52,8 +52,8 @@ evidence: [<link or traffic capture showing the names and addresses>]
   point at a resource anyone could claim;
 - names are matched on label boundaries, lower case, ASCII only (IDNs as A-labels), without a trailing dot. Sets
   hold no other form. sing-box matches a `domain_suffix` without a leading dot on label boundaries and lowercases
-  the host, but does not strip a trailing dot, so the Niko client strips one from a sniffed or FakeIP name before
-  its rules;
+  the host, but does not strip a trailing dot, so the Niko client strips one at the single place its rules read a
+  name, whatever its source (sniffing, a SOCKS or HTTP inbound);
 - a set's tag never ends in `.entries`, `.srs` or `.txt`;
 - no suffix whose subdomains third parties control by DNS (shared hosting, cloud zones), and a search for dangling
   CNAMEs pointing at resources anyone could claim: a relay resolves `inside-only` names itself;
@@ -72,8 +72,9 @@ evidence: [<link or traffic capture showing the names and addresses>]
 CI builds one `.srs` per app and per `kind` and country, and `manifest.json` with an `epoch`, a version that only
 grows within it (at most 2^53) and, per file, `name`, `sha256`, `size`, `kind`, `country` and `form`. The epoch must
 equal the one built into the reader; a release that retires a leaked lists key raises it, and the version starts
-again in the new epoch. A release is tagged `m<epoch>.<version>`; the tags are protected from deletion and
-rewriting, and a reader checking GitHub for the newest release looks only at its own epoch's tags.
+again in the new epoch. A release is tagged `m<epoch>.<version>`, both decimal without leading zeros; a tag whose
+name is not byte for byte that of its manifest is false. The tags are protected from deletion and rewriting, and a
+reader checking GitHub for the newest release looks only at its own epoch's tags.
 
 - `kind`: `inside-only` | `blocked` | `ads` | `country` | `cdn`;
 - `form`: `srs` (read by the client) | `text` (read by the server).
