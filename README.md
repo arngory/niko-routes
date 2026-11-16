@@ -45,7 +45,36 @@ evidence: [<link or traffic capture showing the names and addresses>]
 ## Build and signing
 
 CI builds one `.srs` per app and per `kind` and country, and `manifest.json` with a version that only grows and,
-per file, SHA-256, size, `kind` and `country`.
+per file, `name`, `sha256`, `size`, `kind`, `country` and `form`:
+
+- `kind`: `inside-only` | `blocked` | `ads` | `country`;
+- `form`: `srs` (read by the client) | `text` (read by the server).
+
+**Server form of the sets.** Next to each `.srs`, CI builds `<tag>.txt` from the same YAML entries:
+
+- lines `suffix:<domain>` and `cidr:<subnet>`;
+- domains in lower case, IDNs as A-labels (punycode), subnets in canonical form (`netip.Prefix.Masked`);
+- sorted, no duplicates, UTF-8, LF, no comments.
+
+The server reads only this form and the client only `.srs`. Both come from one commit in one CI run, and both
+are listed in the manifest.
+
+**Country sets.** `country-<cc>.txt`, `kind: country`, `form: text` only, with `cidr:` lines alone, merged and
+collapsed:
+
+- an address is in a country's set only when **both** sources place it there: the RIR delegations
+  (delegated-extended of all five RIRs) **and** IPinfo Lite. An intersection, not a union: a foreign address
+  taken as domestic would open a relay to the outside, while the opposite error only sends a connection through
+  the node;
+- subnets of CDNs and clouds (the same exclusions as for entries), private, special-purpose and bogon ranges are
+  removed;
+- IPinfo Lite is CC BY-SA 4.0, so a country set is published under CC BY-SA 4.0 with attribution to IPinfo, here
+  and in the manifest;
+- if a country set changes by more than 5 % of its addresses between versions, CI requires a person's explicit
+  mark with a reason in the PR, so a broken source does not slip through.
+
+A relay lets out the destinations of its own country's `inside-only` sets and the addresses in
+`country-<its cc>`.
 
 Two keys, as the content and timestamp roles in TUF:
 
