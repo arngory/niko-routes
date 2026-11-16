@@ -46,8 +46,10 @@ evidence: [<link or traffic capture showing the names and addresses>]
 - no subnet wider than /16 for IPv4, no entry without `evidence`;
 - no suffix whose subdomains third parties control by DNS (shared hosting, cloud zones), and a search for dangling
   CNAMEs pointing at resources anyone could claim: a relay resolves `inside-only` names itself;
-- an entry that relies on a CDN names it (`cdn:`); CI publishes those providers' ranges separately, and a relay
-  lets a resolved address out only into the entry's AS, subnets or named CDNs;
+- an entry that relies on a CDN names it (`cdn:`), from a closed list of providers kept by CI, with `evidence` and
+  review. CI builds those providers' ranges into files of their own (`cdn-<provider>`), listed in the signed
+  manifest, so a node cannot swap them. This does not lift the ban on CDN subnets in sets: a relay lets a
+  resolved address out into a named CDN only when it resolved that entry's own name itself;
 - every Android package carries its signing certificates (`cert_sha256`). A confirmed client tags a connection with
   its set only when the installed package's signature matches, since a relay lets a confirmed inside-only app out
   to any address: an app with a borrowed package name must not get the tag.
