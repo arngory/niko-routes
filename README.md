@@ -92,5 +92,20 @@ A reader checks the manifest first (the lists key, a version not below the one i
 
 ## Contributing
 
-Every change to the lists is a PR with `evidence`, reviewed by two people. Third-party lists may be used as input
-to CI, never shipped as they are.
+The lists are maintained by the Niko team; the lists key is held by the owner. Outside PRs are welcome within these
+limits:
+
+- a PR from outside may touch only entries under `apps/`; CI rejects anything else (workflows, keys, scripts,
+  country sets, exclusions), and `CODEOWNERS` puts every other path under the maintainers;
+- every change is a PR with `evidence`, reviewed by two maintainers;
+- `inside-only` entries get the strictest review: they send traffic past the foreign exit, directly or through a
+  relay in the user's country;
+- third-party lists may be used as input to CI, never shipped as they are.
+
+## Setting up the keys (owner)
+
+- lists key: `minisign -G` on an offline machine; the secret key goes into a GitHub environment that requires the
+  owner's approval for each run; the public key goes into `keys/lists.pub` here and into the Niko and raycontrol
+  builds;
+- freshness key: `minisign -G` the same way; the secret key goes into a separate environment open to `main` only;
+  its public key is listed in `manifest.json`.
