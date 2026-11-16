@@ -134,6 +134,9 @@ limits:
 
 ## Setting up the keys (owner)
 
+Current keys, epoch 1: lists key `352369B3BF839B6E` (`keys/lists.pub`), freshness key `062B6A45D2714A34`
+(`keys/freshness.pub`).
+
 - lists key: `minisign -G` on an offline machine; the secret key goes into the environment `lists-release` as
   `LISTS_MINISIGN_KEY`, its password as `LISTS_MINISIGN_PASSWORD`, with the owner as its only required
   reviewer, never into repository secrets: every workflow of the repository can read those, the freshness job
