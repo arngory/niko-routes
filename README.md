@@ -55,18 +55,18 @@ evidence: [<link or traffic capture showing the names and addresses>]
 - an entry that relies on a CDN names it (`cdn:`), from a closed list of providers kept by CI, with `evidence` and
   review. CI builds those providers' ranges into files of their own (`cdn-<provider>`, `kind: cdn`, no
   `country`), listed in the signed manifest, so a node cannot swap them. Only the relay's check of its own
-  resolution reads them; sets, the node's nftables and client rules skip them, and the manifest schema enforces it. This does not lift the ban on CDN subnets in sets: a relay lets a
-  resolved address out into a named CDN only when it resolved that entry's own name itself;
+  resolution reads them; sets, the node's nftables and client rules skip them, and the manifest schema enforces
+  it. This does not lift the ban on CDN subnets in sets: a relay lets a resolved address out into a named CDN only
+  when it resolved that entry's own name itself;
 - every Android package carries its signing certificates (`cert_sha256`). A confirmed client tags a connection with
   its set only when the installed package's signature matches, since a relay lets a confirmed inside-only app out
   to any address: an app with a borrowed package name must not get the tag.
 
 ## Build and signing
 
-CI builds one `.srs` per app and per `kind` and country, and `manifest.json` with an `epoch` and a version that only
-grows within it (at most 2^53; the epoch must equal the one built into the reader, and is raised by a release that
-retires a leaked lists key) and,
-per file, `name`, `sha256`, `size`, `kind`, `country` and `form`:
+CI builds one `.srs` per app and per `kind` and country, and `manifest.json` with an `epoch`, a version that only
+grows within it (at most 2^53) and, per file, `name`, `sha256`, `size`, `kind`, `country` and `form`. The epoch must
+equal the one built into the reader; a release that retires a leaked lists key raises it.
 
 - `kind`: `inside-only` | `blocked` | `ads` | `country` | `cdn`;
 - `form`: `srs` (read by the client) | `text` (read by the server).
@@ -102,16 +102,15 @@ Two keys, as the content and timestamp roles in TUF:
 - the **lists key** signs `manifest.json` on a release, after reviewed PRs, with a human approving the job. Its
   public keys are built into the Niko client and raycontrol only and change only with their releases;
 - the **freshness key** signs a small `timestamp.json` (the manifest's version and SHA-256, the signing time and
-  `expires`, at most 14 days later) every day, committed to the unprotected `timestamp` branch. The
-  key lives in a GitHub environment open only to the `main` branch, not in repository secrets; the job itself
-  requires `github.event_name == 'schedule'`, and the workflow has no `pull_request_target` or
-  `workflow_dispatch` trigger. Its public
-  keys are listed in the signed manifest. A leak of it can only keep an old version alive, never change the lists.
+  `expires`, at most 14 days later) every day, committed to the unprotected `timestamp` branch. The key lives in
+  a GitHub environment open only to the `main` branch, not in repository secrets; the job itself requires
+  `github.event_name == 'schedule'`, and the workflow has no `pull_request_target` or `workflow_dispatch` trigger.
+  Its public keys are listed in the signed manifest. A leak of it can only keep an old version alive, never change
+  the lists.
 
 The manifest may carry several signatures, one `.minisig` per key id; a reader accepts it if any trusted lists key
 verifies. A reader checks the manifest first (the lists key, its epoch, a version not below the one it accepted in
-that epoch), then
-`timestamp.json` under the freshness keys that manifest lists.
+that epoch), then `timestamp.json` under the freshness keys that manifest lists.
 
 ## Contributing
 
