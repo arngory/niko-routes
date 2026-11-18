@@ -1,11 +1,13 @@
 # niko-routes
 
+English | [Русский](README.ru.md)
+
 Per-app routing lists for [Niko](https://github.com/arngory/niko): each entry is an app or a service with its
 packages, programs, domains and subnets, built into signed sing-box rule sets (`.srs`).
 
 **Status: draft.** The format and the signing model below are a proposal under review with the Niko client and
 the raycontrol node. Nothing here is consumed yet. The design and its reasoning live in the Niko repository,
-`docs/design/ROUTING-APPS.md`.
+[`docs/research/routing-apps.md`](https://github.com/arngory/niko/blob/main/docs/research/routing-apps.md).
 
 ## Why apps, not domains
 
@@ -122,8 +124,8 @@ that epoch), then `timestamp.json` under the freshness keys that manifest lists.
 
 ## Contributing
 
-The lists are maintained by the Niko team; the lists key is held by the owner. Outside PRs are welcome within these
-limits:
+The rules of the Niko repositories: [CONTRIBUTING.md](CONTRIBUTING.md) (in Russian). The lists are maintained by the
+Niko team; the lists key is held by the owner. Outside PRs are welcome within these limits:
 
 - a PR from outside may touch only entries under `apps/`; CI rejects anything else (workflows, keys, scripts,
   country sets, exclusions), and `CODEOWNERS` puts every other path under the maintainers;
